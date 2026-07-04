@@ -15,8 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
-      - run: npm ci
+      - run: npm install
       - run: npm run lint
       - run: npm run typecheck
 
@@ -28,12 +27,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - run: npm ci
+      - run: npm install
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug
@@ -51,12 +49,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - run: npm ci
+      - run: npm install
       - name: Build release AAB
         working-directory: android
         run: ./gradlew bundleRelease
