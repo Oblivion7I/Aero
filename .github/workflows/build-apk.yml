@@ -1,0 +1,70 @@
+name: Android Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+
+  build-debug-apk:
+    needs: lint-and-typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - run: npm ci
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aero-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+
+  build-release-bundle:
+    if: github.ref == 'refs/heads/main'
+    needs: lint-and-typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - run: npm ci
+      - name: Build release AAB
+        working-directory: android
+        run: ./gradlew bundleRelease
+        env:
+          ORG_GRADLE_PROJECT_AERO_UPLOAD_STORE_PASSWORD: ${{ secrets.AERO_UPLOAD_STORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_AERO_UPLOAD_KEY_ALIAS: ${{ secrets.AERO_UPLOAD_KEY_ALIAS }}
+          ORG_GRADLE_PROJECT_AERO_UPLOAD_KEY_PASSWORD: ${{ secrets.AERO_UPLOAD_KEY_PASSWORD }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aero-release-bundle
+          path: android/app/build/outputs/bundle/release/*.aab
