@@ -20,7 +20,8 @@
       "@models/*": ["src/models/*"],
       "@types/*": ["src/types/*"],
       "@hooks/*": ["src/hooks/*"],
-      "@assets/*": ["src/assets/*"]
+      "@assets/*": ["src/assets/*"],
+      "@native/*": ["src/native/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "index.js"]

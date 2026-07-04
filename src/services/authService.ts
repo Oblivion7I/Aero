@@ -28,8 +28,8 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
 
 export const mapAuthError = (error: unknown): string => {
   const code = (error as { code?: string })?.code;
-  if (code && AUTH_ERROR_MESSAGES[code]) return AUTH_ERROR_MESSAGES[code];
-  return 'Something went wrong. Please try again.';
+  const message = code ? AUTH_ERROR_MESSAGES[code] : undefined;
+  return message ?? 'Something went wrong. Please try again.';
 };
 
 /**
@@ -60,10 +60,17 @@ export const signInWithEmail = async (email: string, password: string): Promise<
 
 export const signInWithGoogle = async (): Promise<AuthResult> => {
   await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-  const { idToken } = await GoogleSignin.signIn();
+  const response = await GoogleSignin.signIn();
+
+  if (response.type !== 'success') {
+    throw new Error('Google sign-in was cancelled.');
+  }
+
+  const idToken = response.data.idToken;
   if (!idToken) {
     throw new Error('Google sign-in did not return an ID token.');
   }
+
   const googleCredential = auth.GoogleAuthProvider.credential(idToken);
   const credential = await auth().signInWithCredential(googleCredential);
   return toAuthResult(credential.user);
@@ -82,8 +89,11 @@ export const signOutUser = async (): Promise<void> => {
   await auth().signOut();
 };
 
-export const isGoogleSignInCancelled = (error: unknown): boolean =>
-  (error as { code?: string })?.code === statusCodes.SIGN_IN_CANCELLED;
+export const isGoogleSignInCancelled = (error: unknown): boolean => {
+  const code = (error as { code?: string })?.code;
+  const message = (error as { message?: string })?.message;
+  return code === statusCodes.SIGN_IN_CANCELLED || message === 'Google sign-in was cancelled.';
+};
 
 export const getCurrentUser = (): AuthResult | null => {
   const user = auth().currentUser;

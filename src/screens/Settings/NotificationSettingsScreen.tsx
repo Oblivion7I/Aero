@@ -37,7 +37,7 @@ const NotificationSettingsScreen: React.FC = () => {
               <Text style={[styles.description, { color: theme.textSecondary }]}>{t.description}</Text>
             </View>
             <Switch
-              value={enabled[t.key]}
+              value={enabled[t.key] ?? false}
               onValueChange={() => toggle(t.key)}
               trackColor={{ false: theme.border, true: Colors.primary }}
             />

@@ -1,5 +1,6 @@
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
+import CryptoJS from 'crypto-js';
 import { BackupRecord } from '@models/CloudBackup';
 
 /**
@@ -31,8 +32,17 @@ export const uploadEncryptedBackup = async (
   await backupsCollection(uid).doc(id).set(meta);
 };
 
-/** Downloads the raw encrypted payload for a backup so it can be decrypted client-side. */
+/**
+ * Downloads the raw encrypted payload for a backup so it can be decrypted
+ * client-side. The Storage JS SDK has no direct "read as string" method, so
+ * this fetches the file via its download URL and re-encodes the bytes back
+ * to base64 (decode-then-encode round-trips to the exact original string).
+ */
 export const downloadEncryptedBackup = async (uid: string, id: string): Promise<string> => {
   const ref = storage().ref(`backups/${uid}/${id}.enc`);
-  return ref.getString('base64');
+  const url = await ref.getDownloadURL();
+  const response = await fetch(url);
+  const buffer = await response.arrayBuffer();
+  const wordArray = CryptoJS.lib.WordArray.create(buffer);
+  return CryptoJS.enc.Base64.stringify(wordArray);
 };

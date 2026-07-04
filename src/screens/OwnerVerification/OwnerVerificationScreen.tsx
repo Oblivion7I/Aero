@@ -50,12 +50,12 @@ const PERMISSIONS: PermissionItem[] = [
  */
 const ANDROID_PERMISSIONS: Record<string, string[]> = {
   location: [
-    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-    PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION!,
+    PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION!,
   ],
   notifications:
     Platform.OS === 'android' && Platform.Version >= 33
-      ? [PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS]
+      ? [PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS!]
       : [],
   storage: [], // Scoped storage on modern Android needs no runtime grant for app-internal reporting.
   device_admin: [], // Handled separately via DevicePolicyManager — not a PermissionsAndroid permission.

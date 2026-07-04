@@ -1,12 +1,10 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native';
-import { DarkTheme, LightTheme, ThemeMode } from '@constants/colors';
-
-type ThemeShape = typeof LightTheme;
+import { DarkTheme, LightTheme, ThemeColors, ThemeMode } from '@constants/colors';
 
 interface ThemeContextValue {
   mode: ThemeMode;
-  theme: ThemeShape;
+  theme: ThemeColors;
   setMode: (mode: ThemeMode) => void;
 }
 

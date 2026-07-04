@@ -26,7 +26,16 @@ export const Colors = {
   borderDark: '#334155',
 } as const;
 
-export const LightTheme = {
+export interface ThemeColors {
+  background: string;
+  surface: string;
+  text: string;
+  textSecondary: string;
+  border: string;
+  primary: string;
+}
+
+export const LightTheme: ThemeColors = {
   background: Colors.backgroundLight,
   surface: Colors.surfaceLight,
   text: Colors.textPrimary,
@@ -35,7 +44,7 @@ export const LightTheme = {
   primary: Colors.primary,
 };
 
-export const DarkTheme = {
+export const DarkTheme: ThemeColors = {
   background: Colors.backgroundDark,
   surface: Colors.surfaceDark,
   text: '#F1F5F9',
