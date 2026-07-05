@@ -12,8 +12,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle")
-        classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("com.android.tools.build:gradle:8.5.1")
+        classpath("com.facebook.react:react-native-gradle-plugin:0.75.4")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         // Firebase — required after following docs/installation.md.
         classpath("com.google.gms:google-services:4.4.2")
