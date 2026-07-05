@@ -8,6 +8,13 @@ react {
 
 def enableProguardInReleaseBuilds = true
 
+// Only true once a real keystore file has been placed at android/app/ and
+// the AERO_UPLOAD_STORE_FILE property points at it. Until then, release
+// builds fall back to debug signing so CI/local builds still succeed —
+// see docs/developer-guide.md#signing before shipping a real release.
+def hasReleaseKeystore = project.hasProperty('AERO_UPLOAD_STORE_FILE') &&
+    file("${AERO_UPLOAD_STORE_FILE}").exists()
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -25,9 +32,8 @@ android {
 
     signingConfigs {
         release {
-            def storeFilePath = project.hasProperty('AERO_UPLOAD_STORE_FILE') ? AERO_UPLOAD_STORE_FILE : null
-            if (storeFilePath != null) {
-                storeFile file(storeFilePath)
+            if (hasReleaseKeystore) {
+                storeFile file(AERO_UPLOAD_STORE_FILE)
                 storePassword project.hasProperty('AERO_UPLOAD_STORE_PASSWORD') ? AERO_UPLOAD_STORE_PASSWORD : ""
                 keyAlias project.hasProperty('AERO_UPLOAD_KEY_ALIAS') ? AERO_UPLOAD_KEY_ALIAS : ""
                 keyPassword project.hasProperty('AERO_UPLOAD_KEY_PASSWORD') ? AERO_UPLOAD_KEY_PASSWORD : ""
@@ -40,7 +46,8 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            signingConfig signingConfigs.release
+            // Falls back to debug signing until a real release keystore exists.
+            signingConfig hasReleaseKeystore ? signingConfigs.release : signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             shrinkResources enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
@@ -54,5 +61,9 @@ dependencies {
     implementation platform("com.google.firebase:firebase-bom:33.1.0")
 }
 
-// Applied last — reads android/app/google-services.json once added (see docs/installation.md).
-apply plugin: "com.google.gms.google-services"
+// Only applied once android/app/google-services.json actually exists — see
+// docs/installation.md. Without this guard, Gradle fails immediately for
+// anyone who hasn't configured Firebase yet.
+if (file("google-services.json").exists()) {
+    apply plugin: "com.google.gms.google-services"
+}
